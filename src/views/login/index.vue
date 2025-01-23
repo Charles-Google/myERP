@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 import Motion from "./utils/motion";
 import { useRouter } from "vue-router";
 import { message } from "@/utils/message";
-import { loginRules } from "./utils/rule";
+import { loginRules } from "./utils/rules";
 import { useNav } from "@/layout/hooks/useNav";
 import type { FormInstance } from "element-plus";
 import { $t, transformI18n } from "@/plugins/i18n";
@@ -15,13 +15,16 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { ref, reactive, toRaw, onMounted, onBeforeUnmount } from "vue";
 import { useTranslationLang } from "@/layout/hooks/useTranslationLang";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import LoginForm from "./components/LoginForm.vue";
+import RegisterForm from "./components/RegisterForm.vue";
+import ForgetForm from "./components/ForgetForm.vue";
 
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import globalization from "@/assets/svg/globalization.svg?component";
-import Lock from "@iconify-icons/ri/lock-fill";
+import Lock from "@iconify-icons/ep/lock";
 import Check from "@iconify-icons/ep/check";
-import User from "@iconify-icons/ri/user-3-fill";
+import User from "@iconify-icons/ep/user";
 
 defineOptions({
   name: "Login"
@@ -39,9 +42,60 @@ dataThemeChange(overallStyle.value);
 const { title, getDropdownItemStyle, getDropdownItemClass } = useNav();
 const { locale, translationCh, translationEn } = useTranslationLang();
 
-const ruleForm = reactive({
+// 新增状态管理
+const currentView = ref<"login" | "register" | "forget">("login");
+
+// 表单数据
+const loginForm = reactive({
   username: "admin",
   password: "admin123"
+});
+
+const registerForm = reactive({
+  username: "",
+  password: "",
+  confirmPassword: "",
+  email: ""
+});
+
+const forgetForm = reactive({
+  email: ""
+});
+
+// 表单规则
+const registerRules = reactive({
+  username: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 4, max: 20, message: "长度在 4 到 20 个字符", trigger: "blur" }
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 6, max: 20, message: "长度在 6 到 20 个字符", trigger: "blur" }
+  ],
+  confirmPassword: [
+    { required: true, message: "请确认密码", trigger: "blur" },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== registerForm.password) {
+          callback(new Error("两次输入密码不一致"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur"
+    }
+  ],
+  email: [
+    { required: true, message: "请输入邮箱", trigger: "blur" },
+    { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }
+  ]
+});
+
+const forgetRules = reactive({
+  email: [
+    { required: true, message: "请输入邮箱", trigger: "blur" },
+    { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }
+  ]
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
@@ -50,7 +104,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
     if (valid) {
       loading.value = true;
       useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
+        .loginByUsername({ username: loginForm.username, password: "admin123" })
         .then(res => {
           if (res.success) {
             // 获取后端路由
@@ -82,142 +136,202 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.document.removeEventListener("keypress", onkeypress);
 });
+
+// 处理函数
+const handleRegister = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      // 实现注册逻辑
+      console.log("注册信息:", registerForm);
+    }
+  });
+};
+
+const handleForgetPassword = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      // 实现忘记密码逻辑
+      console.log("重置密码邮箱:", forgetForm.email);
+    }
+  });
+};
+
+// 视图切换函数
+const switchView = (view: "login" | "register" | "forget") => {
+  currentView.value = view;
+};
 </script>
 
 <template>
-  <div class="select-none">
-    <img :src="bg" class="wave" />
-    <div class="flex-c absolute right-5 top-3">
-      <!-- 主题 -->
+  <div
+    class="relative min-h-screen w-full bg-[#1890ff] flex items-center justify-center"
+  >
+    <!-- 主题切换和国际化 -->
+    <div class="absolute right-5 top-3 z-10 flex items-center space-x-2">
       <el-switch
         v-model="dataTheme"
         inline-prompt
         :active-icon="dayIcon"
         :inactive-icon="darkIcon"
+        class="!mr-2"
         @change="dataThemeChange"
       />
-      <!-- 国际化 -->
       <el-dropdown trigger="click">
         <globalization
-          class="hover:text-primary hover:!bg-[transparent] w-[20px] h-[20px] ml-1.5 cursor-pointer outline-none duration-300"
+          class="w-5 h-5 cursor-pointer text-white hover:opacity-80 transition-opacity"
         />
         <template #dropdown>
-          <el-dropdown-menu class="translation">
+          <el-dropdown-menu class="!p-1">
             <el-dropdown-item
-              :style="getDropdownItemStyle(locale, 'zh')"
-              :class="['dark:!text-white', getDropdownItemClass(locale, 'zh')]"
+              :class="['!px-4 !py-2', getDropdownItemClass(locale, 'zh')]"
               @click="translationCh"
             >
               <IconifyIconOffline
                 v-show="locale === 'zh'"
-                class="check-zh"
                 :icon="Check"
+                class="absolute left-2"
               />
               简体中文
             </el-dropdown-item>
             <el-dropdown-item
-              :style="getDropdownItemStyle(locale, 'en')"
-              :class="['dark:!text-white', getDropdownItemClass(locale, 'en')]"
+              :class="['!px-4 !py-2', getDropdownItemClass(locale, 'en')]"
               @click="translationEn"
             >
-              <span v-show="locale === 'en'" class="check-en">
-                <IconifyIconOffline :icon="Check" />
-              </span>
+              <IconifyIconOffline
+                v-show="locale === 'en'"
+                :icon="Check"
+                class="absolute left-2"
+              />
               English
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
     </div>
-    <div class="login-container">
-      <div class="img">
-        <component :is="toRaw(illustration)" />
+
+    <!-- 登录卡片 - 调整为更大的相对尺寸 -->
+    <div
+      class="w-[65%] h-[68vh] bg-white rounded-lg shadow-lg flex overflow-hidden"
+    >
+      <!-- 左侧插画区域 - 使用相对尺寸 -->
+      <div class="w-50% bg-white p-12 flex items-center justify-center">
+        <component :is="toRaw(illustration)" class="w-4/5 h-auto" />
       </div>
-      <div class="login-box">
-        <div class="login-form">
-          <avatar class="avatar" />
-          <Motion>
-            <h2 class="outline-none">{{ title }}</h2>
-          </Motion>
 
-          <el-form
-            ref="ruleFormRef"
-            :model="ruleForm"
-            :rules="loginRules"
-            size="large"
-          >
-            <Motion :delay="100">
-              <el-form-item
-                :rules="[
-                  {
-                    required: true,
-                    message: transformI18n($t('login.pureUsernameReg')),
-                    trigger: 'blur'
-                  }
-                ]"
-                prop="username"
-              >
-                <el-input
-                  v-model="ruleForm.username"
-                  clearable
-                  :placeholder="t('login.pureUsername')"
-                  :prefix-icon="useRenderIcon(User)"
-                />
-              </el-form-item>
-            </Motion>
+      <!-- 右侧表单区域 - 使用相对尺寸 -->
+      <div class="w-50% px-[8%] py-[5%] flex flex-col">
+        <!-- 固定标题部分 -->
+        <h2 class="text-2xl font-normal text-center mt-8 mb-6 flex-none">
+          四川交建材料公司信息化管控平台
+        </h2>
 
-            <Motion :delay="150">
-              <el-form-item prop="password">
-                <el-input
-                  v-model="ruleForm.password"
-                  clearable
-                  show-password
-                  :placeholder="t('login.purePassword')"
-                  :prefix-icon="useRenderIcon(Lock)"
-                />
-              </el-form-item>
-            </Motion>
-
-            <Motion :delay="250">
-              <el-button
-                class="w-full mt-4"
-                size="default"
-                type="primary"
-                :loading="loading"
-                @click="onLogin(ruleFormRef)"
-              >
-                {{ t("login.pureLogin") }}
-              </el-button>
-            </Motion>
-          </el-form>
+        <!-- 表单切换容器 -->
+        <div class="relative flex-1 flex items-center">
+          <transition name="form-switch" mode="out-in">
+            <component
+              :is="
+                currentView === 'login'
+                  ? LoginForm
+                  : currentView === 'register'
+                    ? RegisterForm
+                    : ForgetForm
+              "
+              :loading="loading"
+              :onLogin="onLogin"
+              :onRegister="handleRegister"
+              :onForgetPassword="handleForgetPassword"
+              :onSwitchView="switchView"
+            />
+          </transition>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-@import url("@/style/login.css");
-</style>
+<style lang="postcss" scoped>
+:deep(.el-input__wrapper) {
+  @apply !bg-transparent !shadow-none !border-b !border-gray-200 !rounded-none !px-0;
 
-<style lang="scss" scoped>
-:deep(.el-input-group__append, .el-input-group__prepend) {
-  padding: 0;
+  &:hover,
+  &.is-focus {
+    @apply !border-b-2 !border-[#1890ff] !shadow-none;
+    box-shadow: none !important;
+  }
+
+  .el-input__inner {
+    @apply !text-base !text-gray-700;
+
+    &::placeholder {
+      @apply !text-gray-400;
+    }
+  }
 }
 
-.translation {
-  ::v-deep(.el-dropdown-menu__item) {
-    padding: 5px 40px;
+:deep(.el-button--primary) {
+  @apply !bg-[#ff4d7f] !border-none;
+  background: #ff4d7f !important;
+
+  &:hover {
+    @apply !opacity-90;
+  }
+}
+
+/* 输入框图标颜色 */
+:deep(.el-input__prefix-inner svg) {
+  @apply !text-gray-400;
+}
+
+/* 响应式处理 */
+@screen lg {
+  .login-container {
+    @apply px-8;
+  }
+}
+
+@screen md {
+  .login-box {
+    @apply w-[95%] flex-col;
   }
 
-  .check-zh {
-    position: absolute;
-    left: 20px;
+  .illustration-container {
+    @apply w-full h-1/3;
   }
 
-  .check-en {
-    position: absolute;
-    left: 20px;
+  .form-container {
+    @apply w-full h-2/3 px-8;
   }
+}
+
+@screen sm {
+  .login-box {
+    @apply h-screen;
+  }
+}
+
+/* 优化切换动画 */
+.form-switch-enter-active,
+.form-switch-leave-active {
+  transition: all 0.3s ease;
+  position: absolute;
+  width: 100%;
+}
+
+.form-switch-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.form-switch-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+/* 确保表单容器始终居中 */
+.form-container {
+  @apply flex items-center justify-center;
+  min-height: 400px; /* 设置最小高度确保表单始终有足够空间 */
 }
 </style>
