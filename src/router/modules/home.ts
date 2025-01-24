@@ -6,11 +6,12 @@ export default {
   path: "/",
   name: "Home",
   component: Layout,
-  redirect: "/home",
+  redirect: "/report/material-purchase",
   meta: {
     icon: "ep:home-filled",
     title: $t("menus.pureHome"),
-    rank: 0
+    rank: 0,
+    showLink: VITE_HIDE_HOME === "true" ? false : true
   },
   children: [
     {
