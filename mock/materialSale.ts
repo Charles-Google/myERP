@@ -1,16 +1,17 @@
+// src/mock/material.ts
 import { defineFakeRoute } from "vite-plugin-fake-server/client";
 
 // 生成模拟数据
-const generatePurchaseData = (count: number) => {
+const generateSaleData = (count: number) => {
   const data = [];
   for (let i = 0; i < count; i++) {
     const index = i + 1;
     data.push({
-      purchaseDate: "2025-1-8",
-      contractNo: `CGHT${Math.floor(Math.random() * 9000000000 + 1000000000)}`,
+      saleDate: "2025-1-8",
+      contractNo: `XSHT202412310000${String(index).padStart(2, "0")}`,
+      customerName: "四川省川能峨天供应链管理有限公司",
       materialName: "螺纹钢",
-      specModel: "HRB400E∅18",
-      supplierName: "四川省川能峰天供应链管理有限公司"
+      specModel: "HRB400E∅18"
     });
   }
   return data;
@@ -18,12 +19,12 @@ const generatePurchaseData = (count: number) => {
 
 export default defineFakeRoute([
   {
-    url: "/material/purchase/list",
+    url: "/material/sale/list",
     method: "post",
     response: ({ body }) => {
       const { page = 1, pageSize = 10 } = body;
       const total = 658;
-      const list = generatePurchaseData(pageSize);
+      const list = generateSaleData(pageSize);
 
       return {
         success: true,
@@ -41,16 +42,16 @@ export default defineFakeRoute([
     }
   },
   {
-    url: "/material/purchase/statistics",
+    url: "/material/sale/statistics",
     method: "get",
     response: () => {
       return {
         success: true,
         data: {
-          todayAmount: "126,560",
-          monthAmount: "2,256,890",
-          inventory: 12,
-          pending: 25
+          todayAmount: "123,456",
+          monthAmount: "3,456,789",
+          inventory: "45,678",
+          pending: "12,345"
         }
       };
     }

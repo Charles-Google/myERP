@@ -1,7 +1,5 @@
 import type { RouteRecordRaw } from "vue-router";
 
-
-
 export default {
   path: "/report",
   name: "Report",
