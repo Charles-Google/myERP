@@ -5,7 +5,6 @@ import LayNotice from "../lay-notice/index.vue";
 import LayNavMix from "../lay-sidebar/NavMix.vue";
 import { useTranslationLang } from "@/layout/hooks/useTranslationLang";
 import LaySidebarFullScreen from "../lay-sidebar/components/SidebarFullScreen.vue";
-import LaySidebarBreadCrumb from "../lay-sidebar/components/SidebarBreadCrumb.vue";
 import LaySidebarTopCollapse from "../lay-sidebar/components/SidebarTopCollapse.vue";
 
 import GlobalizationIcon from "@/assets/svg/globalization.svg?component";
@@ -38,11 +37,6 @@ const { t, locale, translationCh, translationEn } = useTranslationLang();
       class="hamburger-container"
       :is-active="pureApp.sidebar.opened"
       @toggleClick="toggleSideBar"
-    />
-
-    <LaySidebarBreadCrumb
-      v-if="layout !== 'mix' && device !== 'mobile'"
-      class="breadcrumb-container"
     />
 
     <LayNavMix v-if="layout === 'mix'" />
@@ -155,11 +149,6 @@ const { t, locale, translationCh, translationEn } = useTranslationLang();
         border-radius: 50%;
       }
     }
-  }
-
-  .breadcrumb-container {
-    float: left;
-    margin-left: 16px;
   }
 }
 

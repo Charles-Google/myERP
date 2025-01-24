@@ -1,30 +1,17 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-import Motion from "./utils/motion";
 import { useRouter } from "vue-router";
 import { message } from "@/utils/message";
 import { loginRules } from "./utils/rules";
 import { useNav } from "@/layout/hooks/useNav";
 import type { FormInstance } from "element-plus";
-import { $t, transformI18n } from "@/plugins/i18n";
 import { useLayout } from "@/layout/hooks/useLayout";
 import { useUserStoreHook } from "@/store/modules/user";
 import { initRouter, getTopMenu } from "@/router/utils";
-import { bg, avatar, illustration } from "./utils/static";
-import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { illustration } from "./utils/static";
 import { ref, reactive, toRaw, onMounted, onBeforeUnmount } from "vue";
-import { useTranslationLang } from "@/layout/hooks/useTranslationLang";
-import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import LoginForm from "./components/LoginForm.vue";
 import RegisterForm from "./components/RegisterForm.vue";
 import ForgetForm from "./components/ForgetForm.vue";
-
-import dayIcon from "@/assets/svg/day.svg?component";
-import darkIcon from "@/assets/svg/dark.svg?component";
-import globalization from "@/assets/svg/globalization.svg?component";
-import Lock from "@iconify-icons/ep/lock";
-import Check from "@iconify-icons/ep/check";
-import User from "@iconify-icons/ep/user";
 
 defineOptions({
   name: "Login"
@@ -35,12 +22,6 @@ const ruleFormRef = ref<FormInstance>();
 
 const { initStorage } = useLayout();
 initStorage();
-
-const { t } = useI18n();
-const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
-dataThemeChange(overallStyle.value);
-const { title, getDropdownItemStyle, getDropdownItemClass } = useNav();
-const { locale, translationCh, translationEn } = useTranslationLang();
 
 // 新增状态管理
 const currentView = ref<"login" | "register" | "forget">("login");
@@ -110,11 +91,11 @@ const onLogin = async (formEl: FormInstance | undefined) => {
             // 获取后端路由
             return initRouter().then(() => {
               router.push(getTopMenu(true).path).then(() => {
-                message(t("login.pureLoginSuccess"), { type: "success" });
+                message("登录成功", { type: "success" });
               });
             });
           } else {
-            message(t("login.pureLoginFail"), { type: "error" });
+            message("登录失败", { type: "error" });
           }
         })
         .finally(() => (loading.value = false));
@@ -168,49 +149,6 @@ const switchView = (view: "login" | "register" | "forget") => {
   <div
     class="relative min-h-screen w-full bg-[#1890ff] flex items-center justify-center"
   >
-    <!-- 主题切换和国际化 -->
-    <div class="absolute right-5 top-3 z-10 flex items-center space-x-2">
-      <el-switch
-        v-model="dataTheme"
-        inline-prompt
-        :active-icon="dayIcon"
-        :inactive-icon="darkIcon"
-        class="!mr-2"
-        @change="dataThemeChange"
-      />
-      <el-dropdown trigger="click">
-        <globalization
-          class="w-5 h-5 cursor-pointer text-white hover:opacity-80 transition-opacity"
-        />
-        <template #dropdown>
-          <el-dropdown-menu class="!p-1">
-            <el-dropdown-item
-              :class="['!px-4 !py-2', getDropdownItemClass(locale, 'zh')]"
-              @click="translationCh"
-            >
-              <IconifyIconOffline
-                v-show="locale === 'zh'"
-                :icon="Check"
-                class="absolute left-2"
-              />
-              简体中文
-            </el-dropdown-item>
-            <el-dropdown-item
-              :class="['!px-4 !py-2', getDropdownItemClass(locale, 'en')]"
-              @click="translationEn"
-            >
-              <IconifyIconOffline
-                v-show="locale === 'en'"
-                :icon="Check"
-                class="absolute left-2"
-              />
-              English
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-    </div>
-
     <!-- 登录卡片 - 调整为更大的相对尺寸 -->
     <div
       class="w-[65%] h-[68vh] bg-white rounded-lg shadow-lg flex overflow-hidden"

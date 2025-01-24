@@ -7,6 +7,8 @@ import { useGlobal, isNumber } from "@pureadmin/utils";
 import BackTopIcon from "@/assets/svg/back_top.svg?component";
 import { h, computed, Transition, defineComponent } from "vue";
 import { usePermissionStoreHook } from "@/store/modules/permission";
+import LaySidebarBreadCrumb from "../lay-sidebar/components/SidebarBreadCrumb.vue";
+import { useNav } from "@/layout/hooks/useNav";
 
 const props = defineProps({
   fixedHeader: Boolean
@@ -15,6 +17,7 @@ const props = defineProps({
 const { t } = useI18n();
 const { showModel } = useTags();
 const { $storage, $config } = useGlobal<GlobalPropertiesApi>();
+const { device, layout } = useNav();
 
 const isKeepAlive = computed(() => {
   return $config?.KeepAlive;
@@ -36,10 +39,6 @@ const hideFooter = computed(() => {
 
 const stretch = computed(() => {
   return $storage?.configure.stretch;
-});
-
-const layout = computed(() => {
-  return $storage?.layout.layout === "vertical";
 });
 
 const getMainWidth = computed(() => {
@@ -111,7 +110,12 @@ const transitionMain = defineComponent({
   <section
     :class="[fixedHeader ? 'app-main' : 'app-main-nofixed-header']"
     :style="getSectionStyle"
+    class="overflow-hidden"
   >
+    <LaySidebarBreadCrumb
+      v-if="layout !== 'mix' && device !== 'mobile'"
+      class="ml-6"
+    />
     <router-view>
       <template #default="{ Component, route }">
         <LayFrame :currComp="Component" :currRoute="route">
@@ -211,5 +215,6 @@ const transitionMain = defineComponent({
 
 .main-content {
   margin: 24px;
+  margin-top: 0px;
 }
 </style>

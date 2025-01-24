@@ -157,16 +157,16 @@ onMounted(() => {
             </span>
           </el-button>
         </div>
-        <div class="flex space-x-6">
-          <span class="bg-blue-500 text-white p-2 rounded"
+        <div class="flex space-x-4">
+          <span class="bg-blue-500 text-white px-2 py-1 rounded text-base"
             >应收金额合计：{{
               statistics.totalReceivable.toLocaleString()
             }}</span
           >
-          <span class="bg-blue-500 text-white p-2 rounded"
+          <span class="bg-blue-500 text-white px-2 py-1 rounded text-base"
             >已收金额合计：{{ statistics.totalReceived.toLocaleString() }}</span
           >
-          <span class="bg-blue-500 text-white p-2 rounded"
+          <span class="bg-blue-500 text-white px-2 py-1 rounded text-base"
             >剩余未收金额合计：{{
               statistics.totalUnreceived.toLocaleString()
             }}</span
