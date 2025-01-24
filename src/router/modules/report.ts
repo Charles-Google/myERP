@@ -35,7 +35,7 @@ export default {
       name: "PayableEvaluation",
       component: () => import("@/views/report/payable-evaluation/index.vue"),
       meta: {
-        title: "应付评估表",
+        title: "应付明细表",
         showLink: true
       }
     },
@@ -44,7 +44,7 @@ export default {
       name: "ReceivableEvaluation",
       component: () => import("@/views/report/receivable-evaluation/index.vue"),
       meta: {
-        title: "应收评估表",
+        title: "应收明细表",
         showLink: true
       }
     }
